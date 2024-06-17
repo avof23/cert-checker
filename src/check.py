@@ -1,4 +1,11 @@
+"""
+The script checks all certificates in a particular directory, reads the Not After attribute.
+If there are less than the specified number of days left until this date, it generates a message.
+
+"""
+
 import os
+import argparse
 import configparser
 import smtplib
 from datetime import datetime as dt
@@ -6,11 +13,20 @@ from datetime import timedelta
 
 from OpenSSL import crypto
 
-now = dt.now()
-config = configparser.ConfigParser()
 
-if os.path.exists('../conf/config.ini'):
-    config.read('../conf/config.ini')
+parser = argparse.ArgumentParser(description="Check expire certificate")
+parser.add_argument('-c', '--config', type=str, help='get configuration from file')
+
+args = parser.parse_args()
+config = configparser.ConfigParser()
+now = dt.now()
+if args.config:
+    config_path = args.config
+else:
+    config_path = '../conf/config.ini'
+
+if os.path.exists(config_path):
+    config.read(config_path)
     work_path = config["options"]["path"].split(sep=":")
     days_before_expire = int(config["options"]["days"])
     days_older_cert = int(config["options"]["older_days"])
@@ -29,6 +45,12 @@ else:
 
 
 def check_cert(cert_path: str) -> tuple:
+    """
+    Function read certificate from openssl lib, get NotAfter date.
+    Return tuple with 2 value: True/False certificate validation test and date not after
+    :param cert_path: path to the certificate to be verified
+    :return: tuple of result validation and Date NotAfter
+    """
     # FILETYPE_ASN1
     with open(cert_path) as fcrt:
         cert = crypto.load_certificate(crypto.FILETYPE_PEM, fcrt.read())
@@ -42,6 +64,12 @@ def check_cert(cert_path: str) -> tuple:
 
 
 def send_email(cert_name: str, date_expiration: dt):
+    """
+    The function generate notification and send via email or console
+    :param cert_name: Certificate file name for notification
+    :param date_expiration: Date NotAfter
+    :return: None
+    """
     alertmsg = (f'The Certificate {cert_name} Not after: {date_expiration},\n'
                f'left: {date_expiration - now}.\n'
                f'Pleace generate new certificate for user!')
@@ -55,6 +83,12 @@ def send_email(cert_name: str, date_expiration: dt):
 
 
 def scaning_certs(certs_path: str) -> int:
+    """
+    The function scan certs folder and call to validation function and
+    send notification function
+    :param certs_path: Folder with contain certificates
+    :return: Int - exit code
+    """
     if not os.path.exists(certs_path):
         print(f'path to certificate is not exist {certs_path}')
         return 1

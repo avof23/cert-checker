@@ -9,11 +9,19 @@ PyOpenSSL module require
 pip install pyopenssl
 ```
 
-## Config file mode
+## Command line argument
+```
+-c --config <path to configuration file>
+```
+If -c argument is not set, by default script open configuration file
+from ../conf/config.ini
+
+
+## Config file settings
 file mast be located in .conf directory and have name config.ini
 ```
 [options]
-path=/etc/openvpn/easy-rsa:/tmp/example
+path=/etc/openvpn/easy-rsa/keys:/tmp/example
 days=5
 older_days=-14
 cert_ext=.crt
@@ -24,3 +32,7 @@ smtp=mail.domain.com
 port=25
 sender=checker@domain.com
 ```
+#### Parameter description
+
+- **days** : How many days before the certificate expires to send a warning message
+- **older_days** : How many days after the expiration date of the certificate to send a notice
