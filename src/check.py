@@ -36,7 +36,7 @@ def check_cert(cert_path: str) -> tuple:
     notafter = dt.strptime(cert.get_notAfter().decode('ascii'), '%Y%m%d%H%M%SZ')
     days_left = notafter - now
 
-    if days_left <= timedelta(days=days_before_expire) and days_left > days_older_cert:
+    if days_left <= timedelta(days=days_before_expire) and days_left.days > days_older_cert:
         return False, notafter
     return True, notafter
 
