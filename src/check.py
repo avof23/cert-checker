@@ -13,6 +13,7 @@ if os.path.exists('../conf/config.ini'):
     config.read('../conf/config.ini')
     work_path = config["options"]["path"].split(sep=":")
     days_before_expire = int(config["options"]["days"])
+    days_older_cert = int(config["options"]["older_days"])
     cert_extension = config["options"]["cert_ext"]
     alert_type = config["options"]["alert_type"]
     email_receiver = config["mail"]["email"]
@@ -22,6 +23,7 @@ if os.path.exists('../conf/config.ini'):
 else:
     work_path = "."
     days_before_expire = 5
+    days_older_cert = -14
     cert_extension = ".crt"
     alert_type = "console"
 
@@ -34,7 +36,7 @@ def check_cert(cert_path: str) -> tuple:
     notafter = dt.strptime(cert.get_notAfter().decode('ascii'), '%Y%m%d%H%M%SZ')
     days_left = notafter - now
 
-    if days_left <= timedelta(days=days_before_expire):
+    if days_left <= timedelta(days=days_before_expire) and days_left > days_older_cert:
         return False, notafter
     return True, notafter
 

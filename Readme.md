@@ -15,6 +15,7 @@ file mast be located in .conf directory and have name config.ini
 [options]
 path=/etc/openvpn/easy-rsa:/tmp/example
 days=5
+older_days=-14
 cert_ext=.crt
 alert_type=console/email
 [mail]
